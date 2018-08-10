@@ -21,17 +21,6 @@
     </panel>
     <panel>
       <single>
-        <title>ES Dashboards</title>
-        <search>
-          <query>| stats count</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-        </search>
-        <option name="drilldown">none</option>
-      </single>
-    </panel>
-    <panel>
-      <single>
         <title>ES Content Update</title>
         <search>
           <query>| rest /services/configs/conf-analytic_stories splunk_server=local count=0
@@ -47,8 +36,8 @@
   </row>
   <row>
     <panel>
+      <title>Data Sources</title>
       <table>
-        <title>Data Inventory</title>
         <search>
           <query>index=_internal source=*license_usage.log TERM(type=Usage) earliest=-7d@d latest=@d
 | fields idx, b, st, h, _time, date_wday
@@ -66,6 +55,8 @@
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
+        <option name="count">15</option>
+        <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
       </table>
     </panel>
