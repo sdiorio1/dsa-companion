@@ -1,0 +1,4 @@
+<nav search_view="search">
+  <view name="content_inventory" default='true' />
+  <view name="dashboards" />
+</nav>

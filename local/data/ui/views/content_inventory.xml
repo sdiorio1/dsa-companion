@@ -1,0 +1,73 @@
+<dashboard>
+  <label>Content Inventory</label>
+  <row>
+    <panel>
+      <single>
+        <title>ES Correlation Searches</title>
+        <search>
+          <query>| rest splunk_server=local count=0 /services/saved/searches 
+| where match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") 
+| search title!="ESCU - *"
+| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| table csearch_label, description, datamodel
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>ES Dashboards</title>
+        <search>
+          <query>| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>ES Content Update</title>
+        <search>
+          <query>| rest /services/configs/conf-analytic_stories splunk_server=local count=0
+| eval datamodels = replace(data_models, "[\[\]\"]", "")
+| table title description datamodels
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Data Inventory</title>
+        <search>
+          <query>index=_internal source=*license_usage.log TERM(type=Usage) earliest=-7d@d latest=@d
+| fields idx, b, st, h, _time, date_wday
+| eval h=if(len(h)=0 OR isnull(h),"(SQUASHED)",h)
+| bin _time span=1d
+| stats sum(b) AS b, dc(h) AS h by st idx date_wday
+| stats avg(b) as avg_b, avg(h) AS Host_Count_per_Day by idx st
+| eval Avg_MB_per_Day=round(avg_b/1024/1024,2)
+| eval Avg_GB_per_Day=round(avg_b/1024/1024/1024,2)
+| eval Avg_MB_per_Host=round(Avg_MB_per_Day/Host_Count_per_Day,2)
+| eval Host_Count_per_Day=round(Host_Count_per_Day,0)
+| rename st AS Sourcetype
+| table idx, Sourcetype, Avg_MB_per_Day, Avg_GB_per_Day, Host_Count_per_Day, Avg_MB_per_Host
+| sort Sourcetype</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

@@ -1,0 +1,23 @@
+[app/ui]
+version = 7.1.2
+modtime = 1533131964.333599000
+
+[app/launcher]
+version = 7.1.2
+modtime = 1533131964.334558000
+
+[app/install/install_source_checksum]
+version = 7.1.2
+modtime = 1533897544.245640000
+
+[views/johansdsa]
+owner = admin
+version = 7.1.2
+modtime = 1533473355.877398000
+
+[views/content_inventory]
+access = read : [ * ], write : [ * ]
+export = none
+owner = admin
+version = 7.1.2
+modtime = 1533896679.261529000
