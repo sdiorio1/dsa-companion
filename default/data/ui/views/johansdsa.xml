@@ -1,25 +1,5 @@
 <form>
   <label>Johans DSA</label>
-  <description>The first time this dashboard is loaded you will get a warning about a missing lookup. This is automatically generated if it is missing. Reload the dashboard after a few minutes and it should load correctly.</description>
-  <search>
-    <query>| makeresults count=1
-| append [|inputlookup Datamodel_Event_Summary.csv]
-| eventstats sum(eval(if(isnull(datamodel),0,1))) AS datamodelcount,count
-| where datamodelcount=0 AND isnull(datamodel)
-| eval s=if(datamodelcount=0 AND count=1,"
-| makeresults count=1
-| eval _time=now(),datamodel=\"\", Acceleration=\"\",EventCount=\"\",Hosts=\"\"
-| outputlookup createinapp=t Datamodel_Event_Summary.csv
-",
-""
-)
-| map maxsearches=1 search="
-| rest /services/search/jobs/export search=\"$s$\"  output_mode=csv  | fields value
-"
-"</query>
-    <earliest>-24h@h</earliest>
-    <latest>now</latest>
-  </search>
   <search>
     <query>| `datamodel("Splunk_Audit", "Datamodel_Acceleration")`
 | rename Datamodel_Acceleration.datamodel AS datamodel, Datamodel_Acceleration.complete AS Acceleration
