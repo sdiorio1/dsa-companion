@@ -1,5 +1,15 @@
-<dashboard>
+<dashboard script="hello-world/hello-world.js">
   <label>Content Inventory</label>
+
+  <row>
+        <panel>
+            <html>
+                <div id="results">Security Apps installed:</div>
+            </html>
+        </panel>
+    </row>
+
+
   <row>
     <panel>
       <single>
