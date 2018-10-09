@@ -1,15 +1,17 @@
 <dashboard script="hello-world/hello-world.js">
   <label>Content Inventory</label>
-
   <row>
         <panel>
+        <title>Results</title>
             <html>
-                <div id="results">Security Apps installed:</div>
+                <div id="results">
+                </div>
+                <div style="width:100%;height:100%;text-align:center;">
+                  <img src="/appserver/static/hello-world/green-check.png" style="height:80px;border;0;"/>
+                </div>
             </html>
         </panel>
-    </row>
-
-
+  </row>
   <row>
     <panel>
       <single>
@@ -48,6 +50,7 @@
     <panel>
       <title>Data Sources</title>
       <table>
+      <title>Data Source inventory on your Splunk instances. Filtered by index and sourcetype. Please check the data type suggestions and correct them if necessary.</title>
         <search>
           <query>index=_internal source=*license_usage.log TERM(type=Usage) earliest=-7d@d latest=@d
 | fields idx, b, st, h, _time, date_wday
@@ -60,7 +63,7 @@
 | eval Avg_MB_per_Host=round(Avg_MB_per_Day/Host_Count_per_Day,2)
 | eval Host_Count_per_Day=round(Host_Count_per_Day,0)
 | rename st AS Sourcetype
-| table idx, Sourcetype, Avg_MB_per_Day, Avg_GB_per_Day, Host_Count_per_Day, Avg_MB_per_Host
+| table idx, Sourcetype, Avg_MB_per_Day, Avg_GB_per_Day, Host_Count_per_Day, Avg_MB_per_Host, TA, Data Type
 | sort Sourcetype</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>

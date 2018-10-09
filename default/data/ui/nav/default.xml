@@ -1,5 +1,6 @@
 <nav search_view="search">
-  <view name="content_inventory" default='true' />
-  <view name="johansdsa" default='true' />
+  <view name="helloworld" />
+  <view name="content_inventory"  default='true'/>
+  <view name="johansdsa" />
   <view name="dashboards" />
 </nav>

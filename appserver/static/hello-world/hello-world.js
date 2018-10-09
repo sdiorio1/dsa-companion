@@ -8,6 +8,7 @@ function queryAJAX() {
                 
                 if (data['entry'][i]['name'] ==  "Splunk_Security_Essentials" ) {
 
+                    //$("#results").append($("<p></p>").text(data['entry'][i]['name']))
                     $("#results").append($("<p></p>").text(data['entry'][i]['name']))
 
                 }
