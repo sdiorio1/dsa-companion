@@ -34,6 +34,7 @@
           <latest>now</latest>
         </search>
         <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
         <drilldown>
           <link target="_blank">search?q=%7C%20rest%20/services/configs/conf-analytic_stories%20splunk_server=local%20count=0%0A%7C%20eval%20datamodels%20=%20replace(data_models,%20%22%5B%5C%5B%5C%5D%5C%22%5D%22,%20%22%22)%0A%7C%20table%20title%20description%20datamodels&amp;earliest=-24h@h&amp;latest=now</link>
         </drilldown>

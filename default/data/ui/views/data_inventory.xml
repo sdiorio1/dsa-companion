@@ -1,5 +1,6 @@
 <dashboard theme="dark">
   <label>Data Inventory</label>
+  <row>
     <panel>
       <title>Data Sources</title>
       <table>

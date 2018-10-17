@@ -1,5 +1,5 @@
 <nav search_view="search">
   <view name="content_inventory"  default='true'/>
-  <view name="data_inventory"/>
+  <view name="data_inventory" />
   <view name="johansdsa" />
 </nav>
