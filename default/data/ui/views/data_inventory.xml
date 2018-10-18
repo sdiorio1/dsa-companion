@@ -17,7 +17,7 @@
 | eval Host_Count_per_Day=round(Host_Count_per_Day,0)
 | rename st AS Sourcetype
 | table idx, Sourcetype, Avg_MB_per_Day, Avg_GB_per_Day, Host_Count_per_Day, Avg_MB_per_Host
-| sort Sourcetype</query>
+| sort - Avg_MB_per_Day</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
