@@ -1,6 +1,8 @@
 <dashboard theme="dark">
   <label>Content Inventory</label>
+  
   <row>
+
     <panel>
       <single>
         <title>ES Correlation Searches</title>
@@ -22,6 +24,7 @@
         </drilldown>
       </single>
     </panel>
+
     <panel>
       <single>
         <title>ES Content Update</title>
@@ -40,5 +43,7 @@
         </drilldown>
       </single>
     </panel>
+
   </row>
+
 </dashboard>
