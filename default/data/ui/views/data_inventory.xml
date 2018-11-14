@@ -1,5 +1,5 @@
 <dashboard theme="dark">
-  <label>Data Inventory</label>
+  <label>By Volume</label>
   <row>
     <panel>
       <title>Data Sources</title>
@@ -23,6 +23,32 @@
         </search>
         <option name="count">15</option>
         <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <table>
+        <title>By Index</title>
+        <search>
+          <query>| tstats count dc(host) AS hosts WHERE earliest=-7d@d index=* BY index sourcetype | sort - count | eventstats sum(count) AS total by index | stats sum(count) AS sum_count dc(sourcetype) AS sourcetype_count list(sourcetype) AS sourcetype  list(count) AS count list(eval(round(((count/total)*100),2)."%")) AS percent_coverage list(hosts) AS unique_hosts by index | sort - sum_count | join index [| rest /servicesNS/-/-/data/indexes splunk_server=* | fields maxDataSize title frozenTimePeriodInSecs splunk_server | eval retention_days=frozenTimePeriodInSecs/60/60/24 | stats list(maxDataSize) list(splunk_server) list(retention_days) by title | rename title AS index]</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>By Datamodel</title>
+        <search>
+          <query>| rest /services/admin/summarization by_tstats=t splunk_server=local count=0  | eval datamodel=replace('summary.id',"DM_".'eai:acl.app'."_","")   | join type=outer datamodel [| rest /services/data/models | fields title acceleration.cron_schedule | rename acceleration.cron_schedule as cron title as datamodel]   | sort 0 datamodel  | eval retention(days)=if('summary.time_range'==0,"unlimited",'summary.time_range'/86400), complete(%)=round('summary.complete'*100,1), size(MB)=round('summary.size'/1048576,1), runDuration(s)=round(runDuration,1)  | rename eai:acl.app AS app summary.* AS * | convert ctime(*_time)  | fields datamodel app cron retention(days) earliest_time latest_time is_inprogress complete(%) size(MB) last_error| sort - size(MB)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
         <option name="drilldown">none</option>
       </table>
     </panel>
