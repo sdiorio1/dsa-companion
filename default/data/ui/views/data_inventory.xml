@@ -1,8 +1,8 @@
 <dashboard theme="dark">
-  <label>By Volume</label>
+  <label>Data Inventory</label>
   <row>
     <panel>
-      <title>Data Volume</title>
+      <title>By Volume</title>
       <table>
         <search>
           <query>index=_internal source=*license_usage.log TERM(type=Usage) earliest=-7d@d latest=@d
@@ -43,7 +43,7 @@
   <row>
     <panel>
       <table>
-        <title>By Datamodel</title>
+        <title>By Datamodel Acceleration</title>
         <search>
           <query>| rest /services/admin/summarization by_tstats=t splunk_server=local count=0  | eval datamodel=replace('summary.id',"DM_".'eai:acl.app'."_","")   | join type=outer datamodel [| rest /services/data/models | fields title acceleration.cron_schedule | rename acceleration.cron_schedule as cron title as datamodel]   | sort 0 datamodel  | eval retention(days)=if('summary.time_range'==0,"unlimited",'summary.time_range'/86400), complete(%)=round('summary.complete'*100,1), size(MB)=round('summary.size'/1048576,1), runDuration(s)=round(runDuration,1)  | rename eai:acl.app AS app summary.* AS * | convert ctime(*_time)  | fields datamodel app cron retention(days) earliest_time latest_time is_inprogress complete(%) size(MB) last_error| sort - size(MB)</query>
           <earliest>-24h@h</earliest>
