@@ -1,8 +1,6 @@
 <dashboard theme="dark">
   <label>Content Inventory</label>
-  
   <row>
-
     <panel>
       <single>
         <title>ES Correlation Searches</title>
@@ -17,14 +15,10 @@
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">all</option>
+        <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <link target="_blank">search?q=%7C%20rest%20splunk_server=local%20count=0%20/services/saved/searches%20%0A%7C%20where%20match('action.correlationsearch.enabled',%20%221%7C%5BTt%5D%7C%5BTt%5D%5BRr%5D%5BUu%5D%5BEe%5D%22)%20%0A%7C%20search%20title!=%22ESCU%20-%20*%22%0A%7C%20rename%20eai:acl.app%20as%20app,%20title%20as%20csearch_name,%20action.correlationsearch.label%20as%20csearch_label,%20action.notable.param.security_domain%20as%20security_domain%20%0A%7C%20rex%20field=qualifiedSearch%20%22.*datamodel(=%7C:%5C%22%7C%5C(%5C%22%7C%5Cs%7C:)(?%3Cdatamodel%3E%5Ba-z,A-Z,_%5D*)%22%0A%7C%20table%20csearch_label,%20description,%20datamodel&amp;earliest=-24h@h&amp;latest=now</link>
-        </drilldown>
       </single>
     </panel>
-
     <panel>
       <single>
         <title>ES Content Update</title>
@@ -36,14 +30,28 @@
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">all</option>
+        <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <link target="_blank">search?q=%7C%20rest%20/services/configs/conf-analytic_stories%20splunk_server=local%20count=0%0A%7C%20eval%20datamodels%20=%20replace(data_models,%20%22%5B%5C%5B%5C%5D%5C%22%5D%22,%20%22%22)%0A%7C%20table%20title%20description%20datamodels&amp;earliest=-24h@h&amp;latest=now</link>
-        </drilldown>
       </single>
     </panel>
-
   </row>
-
+  <row>
+    <panel>
+      <table>
+        <title>Installed Apps</title>
+        <search>
+          <query>| rest /servicesNS/-/-/apps/local splunk_server=* 
+| fields version update.version title core visible
+| search visible=1 core=0
+| stats values(version) AS deployed_versions by title
+| sort - title</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
 </dashboard>
