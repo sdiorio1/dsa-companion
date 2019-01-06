@@ -1,5 +1,5 @@
 <form>
-  <label>Johans DSA</label>
+  <label>JohanB</label>
   <search>
     <query>
       | `datamodel("Splunk_Audit", "Datamodel_Acceleration")`

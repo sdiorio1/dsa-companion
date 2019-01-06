@@ -62,7 +62,8 @@
       <title>New Format</title>
       <table>
         <search>
-          <query>| rest splunk_server=local count=0 /services/saved/searches 
+          <query>
+| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | rename eai:acl.app as app, title as bin, action.correlationsearch.label as correlation_search, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
