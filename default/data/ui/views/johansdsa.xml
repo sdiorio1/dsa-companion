@@ -1,47 +1,43 @@
 <form>
   <label>Johans DSA</label>
   <search>
-    <query>| `datamodel("Splunk_Audit", "Datamodel_Acceleration")`
-| rename Datamodel_Acceleration.datamodel AS datamodel, Datamodel_Acceleration.complete AS Acceleration
-| lookup Datamodel_Event_Summary.csv datamodel OUTPUT _time
-| where isnull(_time) OR _time&lt;=relative_time(now(), "-24h")
-| map maxsearches=100 search="
-| tstats count AS EventCount,dc(host) AS Hosts from datamodel=$datamodel$ WHERE earliest=\"-24h\" | eval datamodel=\"$datamodel$\",Acceleration=\"$Acceleration$\"
-            "
-| eval _time=now()
-| outputlookup createinapp=t Datamodel_Event_Summary.csv</query>
+    <query>
+      | `datamodel("Splunk_Audit", "Datamodel_Acceleration")`
+      | rename Datamodel_Acceleration.datamodel AS datamodel, Datamodel_Acceleration.complete AS Acceleration
+      | lookup Datamodel_Event_Summary.csv datamodel OUTPUT _time
+      | where isnull(_time) OR _time&lt;=relative_time(now(), "-24h")
+      | map maxsearches=100 search="| tstats count AS EventCount,dc(host) AS Hosts from datamodel=$datamodel$ WHERE earliest=\"-24h\" | eval datamodel=\"$datamodel$\",Acceleration=\"$Acceleration$\""
+      | eval _time=now()
+      | outputlookup createinapp=t Datamodel_Event_Summary.csv</query>
     <earliest>-24h@h</earliest>
     <latest>now</latest>
   </search>
   <search id="cs_base">
     <query>
-| rest splunk_server=local count=0 /services/saved/searches 
-| search title!="ESCU - *"
-| where match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]")
-| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain
-| rex field=qualifiedSearch ".*datamodel(=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| lookup Datamodel_Event_Summary.csv datamodel
-| eval csearch_label=coalesce(csearch_label,csearch_name)
-| table csearch_label, description,disabled, qualifiedSearch,datamodel, Hosts EventCount 
-| fillnull EventCount Hosts
-| fields *
-
-</query>
+    | rest splunk_server=local count=0 /services/saved/searches 
+    | search title!="ESCU - *"
+    | where match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]")
+    | rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain
+    | rex field=qualifiedSearch ".*datamodel(=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+    | lookup Datamodel_Event_Summary.csv datamodel
+    | eval csearch_label=coalesce(csearch_label,csearch_name)
+    | table csearch_label, description,disabled, qualifiedSearch,datamodel, Hosts EventCount 
+    | fillnull EventCount Hosts
+    | fields *
+   </query>
   </search>
   <search id="escu_cs_base">
     <query>
-| rest splunk_server=local count=0 /services/saved/searches 
-| search title="ESCU - *"
-
-| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain
-| rex field=qualifiedSearch ".*datamodel(=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| lookup Datamodel_Event_Summary.csv datamodel
-| eval csearch_label=coalesce(csearch_label,csearch_name)
-| table csearch_label, description,disabled, qualifiedSearch,datamodel, Hosts EventCount 
-| fillnull EventCount Hosts
-| fields *
-
-</query>
+    | rest splunk_server=local count=0 /services/saved/searches 
+    | search title="ESCU - *"
+    | rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain
+    | rex field=qualifiedSearch ".*datamodel(=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+    | lookup Datamodel_Event_Summary.csv datamodel
+    | eval csearch_label=coalesce(csearch_label,csearch_name)
+    | table csearch_label, description,disabled, qualifiedSearch,datamodel, Hosts EventCount 
+    | fillnull EventCount Hosts
+    | fields *
+   </query>
   </search>
   <init>
     <unset token="display_assets_1"></unset>
@@ -74,11 +70,12 @@
       <single>
         <title>Hosts in Asset Inventory</title>
         <search>
-          <query>| inputlookup append=T asset_lookup_by_str where (dns=* OR nt_host=* OR ip=* OR mac=*) 
-| inputlookup append=t asset_lookup_by_cidr where (dns=* OR nt_host=* OR ip=* OR mac=*) 
-| dedup asset_id
-| stats count
-</query>
+          <query>
+            | inputlookup append=T asset_lookup_by_str where (dns=* OR nt_host=* OR ip=* OR mac=*) 
+            | inputlookup append=t asset_lookup_by_cidr where (dns=* OR nt_host=* OR ip=* OR mac=*) 
+            | dedup asset_id
+            | stats count
+          </query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
@@ -98,14 +95,16 @@
       <single>
         <title>Hosts with data</title>
         <search>
-          <query>| metadata type=hosts 
-| eval _time=lastTime 
-| table host totalCount _time 
-| reltime 
-| sort sourcetype 
-| rename reltime AS "Last Event"
-| timechart span=1d count
-| where _time&gt;=relative_time(now(),"-24h")</query>
+          <query>
+            | metadata type=hosts 
+            | eval _time=lastTime 
+            | table host totalCount _time 
+            | reltime 
+            | sort sourcetype 
+            | rename reltime AS "Last Event"
+            | timechart span=1d count
+            | where _time&gt;=relative_time(now(),"-24h")
+          </query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
@@ -125,16 +124,18 @@
       <single>
         <title>Hosts in Asset Inventory with data</title>
         <search>
-          <query>| metadata type=hosts 
-| eval _time=lastTime 
-| table host totalCount _time 
-| reltime 
-| sort sourcetype 
-| rename reltime AS "Last Event"
-| where _time&gt;=relative_time(now(),"-24h")
-| `get_asset(host)`
-| where isnotnull(host_asset_id)
-| stats count</query>
+          <query>
+            | metadata type=hosts 
+            | eval _time=lastTime 
+            | table host totalCount _time 
+            | reltime 
+            | sort sourcetype 
+            | rename reltime AS "Last Event"
+            | where _time&gt;=relative_time(now(),"-24h")
+            | `get_asset(host)`
+            | where isnotnull(host_asset_id)
+            | stats count
+          </query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

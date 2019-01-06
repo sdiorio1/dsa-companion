@@ -6,11 +6,12 @@
         <title>ES Correlation Searches</title>
         <search>
           <query>| rest splunk_server=local count=0 /services/saved/searches 
-| where match('action.correlationsearch.enabled', "1|[Tt]|[Tt][Rr][Uu][Ee]") 
+| search action.correlationsearch.enabled = "1"
 | search title!="ESCU - *"
 | rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain 
-| rex field=qualifiedSearch ".*datamodel(=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| table csearch_label, description, datamodel
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
+| table csearch_label, description, datamodel, inputlookup
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
@@ -19,9 +20,11 @@
         <option name="refresh.display">progressbar</option>
       </single>
     </panel>
+  </row>
+  <row>
     <panel>
       <single>
-        <title>ES Content Update</title>
+        <title>ESCU Analytic Stories</title>
         <search>
           <query>| rest /services/configs/conf-analytic_stories splunk_server=local count=0
 | eval datamodels = replace(data_models, "[\[\]\"]", "")
@@ -34,17 +37,40 @@
         <option name="refresh.display">progressbar</option>
       </single>
     </panel>
+    <panel>
+      <single>
+        <title>ESCU Correlation Searches</title>
+        <search>
+          <query>| rest splunk_server=local count=0 /services/saved/searches 
+| search action.correlationsearch.enabled = "1"
+| search title="ESCU - *"
+| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
+| table csearch_label, description, datamodel, inputlookup
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
   </row>
   <row>
     <panel>
+      <title>New Format</title>
       <table>
-        <title>Installed Apps</title>
         <search>
-          <query>| rest /servicesNS/-/-/apps/local splunk_server=* 
-| fields version update.version title core visible
-| search visible=1 core=0
-| stats values(version) AS deployed_versions by title
-| sort - title</query>
+          <query>| rest splunk_server=local count=0 /services/saved/searches 
+| search action.correlationsearch.enabled = "1"
+| rename eai:acl.app as app, title as bin, action.correlationsearch.label as correlation_search, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
+| append [| rest /services/configs/conf-analytic_stories splunk_server=local count=0]
+| rename title as analytic_story
+| eval datamodel = if(isnull(datamodel), replace(data_models, "[\[\]\"]", ""), datamodel)
+| table app, correlation_search, analytic_story, description, datamodel, inputlookup, macro, security_domain, category</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

@@ -5,7 +5,7 @@
       <title>By Volume</title>
       <table>
         <search>
-          <query>index=_internal source=*license_usage.log TERM(type=Usage) earliest=-7d@d latest=@d
+          <query>index=_internal source=*license_usage.log TERM(type=Usage) earliest=-365d@d latest=@d
 | fields idx, b, st, h, _time, date_wday
 | eval h=if(len(h)=0 OR isnull(h),"(SQUASHED)",h)
 | bin _time span=1d
@@ -24,19 +24,21 @@
         <option name="count">15</option>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
       </table>
     </panel>
   </row>
-    <row>
+  <row>
     <panel>
       <table>
         <title>By Index</title>
         <search>
-          <query>| tstats count dc(host) AS hosts WHERE earliest=-7d@d index=* BY index sourcetype | sort - count | eventstats sum(count) AS total by index | stats sum(count) AS sum_count dc(sourcetype) AS sourcetype_count list(sourcetype) AS sourcetype  list(count) AS count list(eval(round(((count/total)*100),2)."%")) AS percent_coverage list(hosts) AS unique_hosts by index | sort - sum_count | join index [| rest /servicesNS/-/-/data/indexes splunk_server=* | fields maxDataSize title frozenTimePeriodInSecs splunk_server | eval retention_days=frozenTimePeriodInSecs/60/60/24 | stats list(maxDataSize) list(splunk_server) list(retention_days) by title | rename title AS index]</query>
+          <query>| tstats count dc(host) AS hosts WHERE earliest=-365d@d index=* BY index sourcetype | sort - count | eventstats sum(count) AS total by index | stats sum(count) AS sum_count dc(sourcetype) AS sourcetype_count list(sourcetype) AS sourcetype  list(count) AS count list(eval(round(((count/total)*100),2)."%")) AS percent_coverage list(hosts) AS unique_hosts by index | sort - sum_count | join index [| rest /servicesNS/-/-/data/indexes splunk_server=* | fields maxDataSize title frozenTimePeriodInSecs splunk_server | eval retention_days=frozenTimePeriodInSecs/60/60/24 | stats list(maxDataSize) list(splunk_server) list(retention_days) by title | rename title AS index]</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
         <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
       </table>
     </panel>
   </row>
