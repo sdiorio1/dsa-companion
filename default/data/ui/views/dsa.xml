@@ -1,0 +1,10 @@
+<dashboard script="js/dsa.js">
+<label>DSA</label>
+    <row>
+        <panel>
+            <html>
+                <div id="table1"></div>
+            </html>
+        </panel>
+    </row>
+</dashboard>
