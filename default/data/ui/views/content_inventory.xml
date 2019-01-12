@@ -1,5 +1,6 @@
 <dashboard theme="dark">
   <label>Content Inventory</label>
+
   <row>
     <panel>
       <single>
@@ -21,6 +22,7 @@
       </single>
     </panel>
   </row>
+
   <row>
     <panel>
       <single>
@@ -57,6 +59,7 @@
       </single>
     </panel>
   </row>
+
   <row>
     <panel>
       <title>New Format</title>
@@ -85,4 +88,5 @@
       </table>
     </panel>
   </row>
+
 </dashboard>
