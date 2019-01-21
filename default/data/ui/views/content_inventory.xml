@@ -3,6 +3,33 @@
   <row>
     <panel>
       <single>
+        <title>All</title>
+        <search>
+          <query>| rest splunk_server=local count=0 /services/saved/searches 
+| search action.correlationsearch.enabled = "1"
+| rename eai:acl.app as app, title as bin, action.correlationsearch.label as correlation_search, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
+| append [| rest /services/configs/conf-analytic_stories splunk_server=local count=0]
+| rename title as analytic_story, eai:acl.app as app_escu
+| eval providing_technologies = replace(providing_technologies, "[\[\]\"]", "")
+| eval detection_searches = replace(detection_searches, "[\[\]\"]", "")
+| eval datamodel = if(isnull(datamodel), replace(data_models, "[\[\]\"]", ""), datamodel)
+| eval app = if(isnull(app), replace(app_escu, "[\[\]\"]", ""), app)
+| eval correlation_search = if(isnull(correlation_search), replace(detection_searches, "[\[\]\"]", ""), correlation_search)
+| table app, correlation_search, analytic_story, description, datamodel, providing_technologies, inputlookup, security_domain, category, qualifiedSearch
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
         <title>ES Correlation Searches</title>
         <search>
           <query>| rest splunk_server=local count=0 /services/saved/searches 
@@ -20,8 +47,6 @@
         <option name="refresh.display">progressbar</option>
       </single>
     </panel>
-  </row>
-  <row>
     <panel>
       <single>
         <title>ESCU Analytic Stories</title>
@@ -55,30 +80,6 @@
         <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
       </single>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <event>
-        <search>
-          <query>| rest splunk_server=local count=0 /services/saved/searches 
-| search action.correlationsearch.enabled = "1"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as correlation_search, action.notable.param.security_domain as security_domain 
-| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
-| append [| rest /services/configs/conf-analytic_stories splunk_server=local count=0]
-| rename title as analytic_story, eai:acl.app as app_escu
-| eval providing_technologies = replace(providing_technologies, "[\[\]\"]", "")
-| eval detection_searches = replace(detection_searches, "[\[\]\"]", "")
-| eval datamodel = if(isnull(datamodel), replace(data_models, "[\[\]\"]", ""), datamodel)
-| eval app = if(isnull(app), replace(app_escu, "[\[\]\"]", ""), app)
-| eval correlation_search = if(isnull(correlation_search), replace(detection_searches, "[\[\]\"]", ""), correlation_search)
-| table app, correlation_search, analytic_story, description, datamodel, , providing_technologies, inputlookup, security_domain, category</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-        </search>
-        <option name="list.drilldown">none</option>
-      </event>
     </panel>
   </row>
 </dashboard>

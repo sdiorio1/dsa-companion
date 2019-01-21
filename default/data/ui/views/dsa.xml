@@ -1,9 +1,9 @@
-<dashboard script="js/dsa.js">
+<dashboard script="dsa/dsa.js" theme="dark">
 <label>DSA</label>
     <row>
         <panel>
             <html>
-                <div id="table1"></div>
+                <div id="results"></div>
             </html>
         </panel>
     </row>
