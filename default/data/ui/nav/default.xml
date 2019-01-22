@@ -1,6 +1,7 @@
 <nav search_view="search">
   <view name="content_inventory"  default='true'/>
   <view name="data_inventory" />
+    <view name="content_inventory_html" />
   <view name="apps_inventory" />
    <collection label="etc">
     <view name="johanb" />
