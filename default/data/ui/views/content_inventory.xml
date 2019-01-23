@@ -1,32 +1,6 @@
 <dashboard theme="dark">
   <label>Content Inventory</label>
-  <row>
-    <panel>
-      <single>
-        <title>All</title>
-        <search>
-          <query>| rest splunk_server=local count=0 /services/saved/searches 
-| search action.correlationsearch.enabled = "1"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as correlation_search, action.notable.param.security_domain as security_domain 
-| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
-| append [| rest /services/configs/conf-analytic_stories splunk_server=local count=0]
-| rename title as analytic_story, eai:acl.app as app_escu
-| eval providing_technologies = replace(providing_technologies, "[\[\]\"]", "")
-| eval detection_searches = replace(detection_searches, "[\[\]\"]", "")
-| eval datamodel = if(isnull(datamodel), replace(data_models, "[\[\]\"]", ""), datamodel)
-| eval app = if(isnull(app), replace(app_escu, "[\[\]\"]", ""), app)
-| eval correlation_search = if(isnull(correlation_search), replace(detection_searches, "[\[\]\"]", ""), correlation_search)
-| table app, correlation_search, analytic_story, description, datamodel, providing_technologies, inputlookup, security_domain, category, qualifiedSearch
-| stats count</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </single>
-    </panel>
-  </row>
+  <description>Please install the Apps: ES, ESCU, Security Essentials, Lookup Editor</description>
   <row>
     <panel>
       <single>
@@ -35,16 +9,43 @@
           <query>| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | search title!="ESCU - *"
-| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain 
+| rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
-| table csearch_label, description, datamodel, inputlookup
+| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| sort search
+| outputlookup dsa_es_searches.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">none</option>
+        <option name="drilldown">all</option>
         <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_es_searches.csv&amp;type=csv</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>ESCU Searches</title>
+        <search>
+          <query>| rest splunk_server=local count=0 /services/saved/searches 
+| search action.correlationsearch.enabled = "1"
+| search title="ESCU - *"
+| rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| sort search
+| outputlookup dsa_escu_searches.csv
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_escu_searches.csv&amp;type=csv</link>
+        </drilldown>
       </single>
     </panel>
     <panel>
@@ -52,33 +53,54 @@
         <title>ESCU Analytic Stories</title>
         <search>
           <query>| rest /services/configs/conf-analytic_stories splunk_server=local count=0
-| eval datamodels = replace(data_models, "[\[\]\"]", "")
-| table title description datamodels
+| eval datamodels = replace(data_models, "[\[\]\"]", "") 
+| eval providing_technologies = replace(providing_technologies, "[\[\]\"]", "")
+| rename eai:acl.app as app
+| table app, title, description, datamodels, providing_technologies, security_domain, category, use_case, mitre, killchain
+| sort title
+| outputlookup dsa_escu_analyticStories.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">none</option>
+        <option name="drilldown">all</option>
         <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_escu_analyticStories.csv&amp;type=csv</link>
+        </drilldown>
       </single>
     </panel>
+  </row>
+  <row>
     <panel>
       <single>
-        <title>ESCU Correlation Searches</title>
+        <title>Security Essentials</title>
         <search>
-          <query>| rest splunk_server=local count=0 /services/saved/searches 
-| search action.correlationsearch.enabled = "1"
-| search title="ESCU - *"
-| rename eai:acl.app as app, title as csearch_name, action.correlationsearch.label as csearch_label, action.notable.param.security_domain as security_domain 
-| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| rex field=qualifiedSearch ".*inputlookup(=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
-| table csearch_label, description, datamodel, inputlookup
+          <query>| sseanalytics   | eval hasSearch=spath(summaries, "hasSearch") | eval includeSSE=spath(summaries, "includeSSE") | eval datasource=spath(summaries, "datasource") | eval displayapp=spath(summaries, "displayapp") | eval app=spath(summaries, "app") | eval journey=spath(summaries, "journey") | eval category=spath(summaries, "category") | eval domain=spath(summaries, "domain") | eval name=spath(summaries, "name") | eval icon=spath(summaries, "icon") | eval description=spath(summaries, "description") | eval dashboard=spath(summaries, "dashboard") | eval mitre=spath(summaries, "mitre") | eval killchain=spath(summaries, "killchain") | eval alertvolume=spath(summaries, "alertvolume") | eval highlight=spath(summaries, "highlight") | eval SPLEase=spath(summaries, "SPLEase")| eval includeSSE=spath(summaries, "includeSSE") | eval bookmark_status=spath(summaries, "bookmark_status")| eval bookmark_user=spath(summaries, "bookmark_user")  | eval usecase=spath(summaries, "usecase") | eval released=spath(summaries, "released") 
+| eval pipefields = null 
+| foreach category datasourc* killchain mitre usecase 
+    [| makemv &lt;&lt;FIELD&gt;&gt; delim="|" ] 
+| search hasSearch= "Yes"
+| rename name as search, usecase as use_case, datasource as providing_technologies, domain as security_domain
+| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| sseanalytics   | eval hasSearch=spath(summaries, "hasSearch") | eval includeSSE=spath(summaries, "includeSSE") | eval datasource=spath(summaries, "datasource") | eval displayapp=spath(summaries, "displayapp") | eval app=spath(summaries, "app") | eval journey=spath(summaries, "journey") | eval category=spath(summaries, "category") | eval domain=spath(summaries, "domain") | eval name=spath(summaries, "name") | eval icon=spath(summaries, "icon") | eval description=spath(summaries, "description") | eval dashboard=spath(summaries, "dashboard") | eval mitre=spath(summaries, "mitre") | eval killchain=spath(summaries, "killchain") | eval alertvolume=spath(summaries, "alertvolume") | eval highlight=spath(summaries, "highlight") | eval SPLEase=spath(summaries, "SPLEase")| eval includeSSE=spath(summaries, "includeSSE") | eval bookmark_status=spath(summaries, "bookmark_status")| eval bookmark_user=spath(summaries, "bookmark_user")  | eval usecase=spath(summaries, "usecase") | eval released=spath(summaries, "released") 
+| eval pipefields = null 
+| foreach category datasourc* killchain mitre usecase 
+    [| makemv &lt;&lt;FIELD&gt;&gt; delim="|" ] 
+| search hasSearch= "Yes"
+| rename name as search, usecase as use_case, datasource as providing_technologies, domain as security_domain
+| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| sort search
+| outputlookup dsa_sse_searches.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">none</option>
+        <option name="drilldown">all</option>
         <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_sse_searches.csv&amp;type=csv</link>
+        </drilldown>
       </single>
     </panel>
   </row>
