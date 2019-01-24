@@ -4,6 +4,5 @@
   <view name="apps_inventory" />
    <collection label="etc">
     <view name="johanb" />
-    <view name="dsa" />
   </collection>
 </nav>

@@ -1,6 +1,6 @@
 <dashboard theme="dark">
   <label>Content Inventory</label>
-  <description>Please install the Apps: ES, ESCU, Security Essentials, Lookup Editor</description>
+  <description>Please install the Apps: ES, ESCU, Security Essentials</description>
   <row>
     <panel>
       <single>
@@ -11,18 +11,15 @@
 | search title!="ESCU - *"
 | rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, qualifiedSearch
 | sort search
 | outputlookup dsa_es_searches.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">all</option>
+        <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_es_searches.csv&amp;type=csv</link>
-        </drilldown>
       </single>
     </panel>
     <panel>
@@ -34,18 +31,15 @@
 | search title="ESCU - *"
 | rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, qualifiedSearch
 | sort search
 | outputlookup dsa_escu_searches.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">all</option>
+        <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_escu_searches.csv&amp;type=csv</link>
-        </drilldown>
       </single>
     </panel>
     <panel>
@@ -55,19 +49,23 @@
           <query>| rest /services/configs/conf-analytic_stories splunk_server=local count=0
 | eval datamodels = replace(data_models, "[\[\]\"]", "") 
 | eval providing_technologies = replace(providing_technologies, "[\[\]\"]", "")
+| eval detection_searches = replace(detection_searches, "[\[\]\"]", "") 
+| eval support_searches = replace(support_searches, "[\[\]\"]", "") 
+| eval investigative_searches = replace(investigative_searches, "[\[\]\"]", "") 
+| eval contextual_searches = replace(contextual_searches, "[\[\]\"]", "") 
+| spath input=mappings path=kill_chain_phases{} output="killchain"
+| spath input=mappings path=mitre_attack{} output="mitre"
+| nomv mitre | nomv killchain
 | rename eai:acl.app as app
-| table app, title, description, datamodels, providing_technologies, security_domain, category, use_case, mitre, killchain
+| table app, title, description, datamodels, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches
 | sort title
 | outputlookup dsa_escu_analyticStories.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">all</option>
+        <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_escu_analyticStories.csv&amp;type=csv</link>
-        </drilldown>
       </single>
     </panel>
   </row>
@@ -96,11 +94,8 @@
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
-        <option name="drilldown">all</option>
+        <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <link target="_blank">/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=dsa-master&amp;lookup=dsa_sse_searches.csv&amp;type=csv</link>
-        </drilldown>
       </single>
     </panel>
   </row>
