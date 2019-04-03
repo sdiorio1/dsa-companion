@@ -4,16 +4,86 @@
   <row>
     <panel>
       <single>
-        <title>ES Correlation Searches</title>
+        <title>All</title>
         <search>
           <query>| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | search title!="ESCU - *"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
+| rename eai:acl.app as app, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, qualifiedSearch
-| sort search
-| outputlookup dsa_es_searches.csv
+| eval source="ES"
+| sort title
+
+| append [
+| sseanalytics   | eval hasSearch=spath(summaries, "hasSearch") | eval includeSSE=spath(summaries, "includeSSE") | eval datasource=spath(summaries, "datasource") | eval displayapp=spath(summaries, "displayapp") | eval app=spath(summaries, "app") | eval journey=spath(summaries, "journey") | eval category=spath(summaries, "category") | eval domain=spath(summaries, "domain") | eval name=spath(summaries, "name") | eval icon=spath(summaries, "icon") | eval description=spath(summaries, "description") | eval dashboard=spath(summaries, "dashboard") | eval mitre=spath(summaries, "mitre") | eval killchain=spath(summaries, "killchain") | eval alertvolume=spath(summaries, "alertvolume") | eval highlight=spath(summaries, "highlight") | eval SPLEase=spath(summaries, "SPLEase")| eval includeSSE=spath(summaries, "includeSSE") | eval bookmark_status=spath(summaries, "bookmark_status")| eval bookmark_user=spath(summaries, "bookmark_user")  | eval usecase=spath(summaries, "usecase") | eval released=spath(summaries, "released") 
+| eval pipefields = null 
+| foreach category datasourc* killchain mitre usecase 
+    [| makemv &lt;&lt;FIELD&gt;&gt; delim="|" ] 
+| search hasSearch= "Yes"
+| rename name as title, usecase as use_case, datasource as providing_technologies, domain as security_domain
+| nomv mitre | nomv killchain | nomv category | nomv providing_technologies | nomv use_case
+| eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ")
+| eval providing_technologies = replace(providing_technologies, ",", " |")
+| eval description = replace(description, ",", "")
+| eval source="Security Essentials"
+| sort title
+]
+
+| append [
+| sseanalytics   | eval hasSearch=spath(summaries, "hasSearch") | eval includeSSE=spath(summaries, "includeSSE") | eval datasource=spath(summaries, "datasource") | eval displayapp=spath(summaries, "displayapp") | eval app=spath(summaries, "app") | eval journey=spath(summaries, "journey") | eval category=spath(summaries, "category") | eval domain=spath(summaries, "domain") | eval name=spath(summaries, "name") | eval icon=spath(summaries, "icon") | eval description=spath(summaries, "description") | eval dashboard=spath(summaries, "dashboard") | eval mitre=spath(summaries, "mitre") | eval killchain=spath(summaries, "killchain") | eval alertvolume=spath(summaries, "alertvolume") | eval highlight=spath(summaries, "highlight") | eval SPLEase=spath(summaries, "SPLEase")| eval includeSSE=spath(summaries, "includeSSE") | eval bookmark_status=spath(summaries, "bookmark_status")| eval bookmark_user=spath(summaries, "bookmark_user")  | eval usecase=spath(summaries, "usecase") | eval released=spath(summaries, "released") 
+| eval pipefields = null 
+| foreach category datasourc* killchain mitre usecase 
+    [| makemv &lt;&lt;FIELD&gt;&gt; delim="|" ] 
+| search displayapp= "Splunk User Behavior Analytics"
+| rename name as title, usecase as use_case, datasource as providing_technologies, domain as security_domain
+| nomv mitre | nomv killchain | nomv category | nomv providing_technologies | nomv use_case
+| eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ")
+| eval providing_technologies = replace(providing_technologies, ",", " |")
+| eval description = replace(description, ",", "")
+| eval source="UBA"
+| sort title
+]
+
+| append [
+| rest splunk_server=local count=0 /services/saved/searches 
+| search action.correlationsearch.enabled = "1"
+| search title="ESCU - *"
+| rename eai:acl.app as app, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| eval description = replace(description, ",", "")
+| eval source="ESCU Searches"
+| sort title
+]
+
+| append [
+| rest /services/configs/conf-analytic_stories splunk_server=local count=0
+| eval datamodels = replace(data_models, "[\[\]\"]", "") 
+| eval providing_technologies = replace(providing_technologies, "[\[\]\"]", "")
+| eval detection_searches = replace(detection_searches, "[\[\]\"]", "") 
+| eval support_searches = replace(support_searches, "[\[\]\"]", "") 
+| eval investigative_searches = replace(investigative_searches, "[\[\]\"]", "") 
+| eval contextual_searches = replace(contextual_searches, "[\[\]\"]", "") 
+| eval providing_technologies = replace(providing_technologies, ",", " |")
+| eval description = replace(description, ",", "")
+| eval detection_searches = replace(detection_searches, ",", " |")
+| eval support_searches = replace(support_searches, ",", " |")
+| eval investigative_searches = replace(investigative_searches, ",", " |")
+| eval contextual_searches = replace(contextual_searches, ",", " |")
+| eval datamodels = replace(datamodels, ",", " |")
+| spath input=mappings path=kill_chain_phases{} output="killchain"
+| spath input=mappings path=mitre_attack{} output="mitre"
+| nomv mitre | nomv killchain
+| eval mitre = replace(mitre, "\n", " | ")
+| eval killchain = replace(killchain, "\n", " | ")
+| rename eai:acl.app as app
+| rename datamodels as datamodel
+| eval source="ESCU Analytic Stories"
+| sort title
+]
+
+| table source, app, title, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, qualifiedSearch
+| sort source
+| outputlookup dsa_all.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
@@ -22,18 +92,21 @@
         <option name="refresh.display">progressbar</option>
       </single>
     </panel>
+  </row>
+  <row>
     <panel>
       <single>
-        <title>ESCU Searches</title>
+        <title>ES Correlation Searches</title>
         <search>
           <query>| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
-| search title="ESCU - *"
+| search title!="ESCU - *"
 | rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
-| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, qualifiedSearch
+| eval source="ES"
+| table source, app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, qualifiedSearch
 | sort search
-| outputlookup dsa_escu_searches.csv
+| outputlookup dsa_es_searches.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
@@ -53,11 +126,21 @@
 | eval support_searches = replace(support_searches, "[\[\]\"]", "") 
 | eval investigative_searches = replace(investigative_searches, "[\[\]\"]", "") 
 | eval contextual_searches = replace(contextual_searches, "[\[\]\"]", "") 
+| eval providing_technologies = replace(providing_technologies, ",", " |")
+| eval description = replace(description, ",", "")
+| eval detection_searches = replace(detection_searches, ",", " |")
+| eval support_searches = replace(support_searches, ",", " |")
+| eval investigative_searches = replace(investigative_searches, ",", " |")
+| eval contextual_searches = replace(contextual_searches, ",", " |")
+| eval datamodels = replace(datamodels, ",", " |")
 | spath input=mappings path=kill_chain_phases{} output="killchain"
 | spath input=mappings path=mitre_attack{} output="mitre"
 | nomv mitre | nomv killchain
+| eval mitre = replace(mitre, "\n", " | ")
+| eval killchain = replace(killchain, "\n", " | ")
 | rename eai:acl.app as app
-| table app, title, description, datamodels, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches
+| eval source="ESCU Analytic Stories"
+| table source, app, title, description, datamodels, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches
 | sort title
 | outputlookup dsa_escu_analyticStories.csv
 | stats count</query>
@@ -68,8 +151,28 @@
         <option name="refresh.display">progressbar</option>
       </single>
     </panel>
-  </row>
-  <row>
+    <panel>
+      <single>
+        <title>ESCU Searches</title>
+        <search>
+          <query>| rest splunk_server=local count=0 /services/saved/searches 
+| search action.correlationsearch.enabled = "1"
+| search title="ESCU - *"
+| rename eai:acl.app as app, title as bin, action.correlationsearch.label as search, action.notable.param.security_domain as security_domain 
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| eval description = replace(description, ",", "")
+| eval source="ESCU Searches"
+| table source, app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, qualifiedSearch
+| sort search
+| outputlookup dsa_escu_searches.csv
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
     <panel>
       <single>
         <title>Security Essentials</title>
@@ -80,14 +183,38 @@
     [| makemv &lt;&lt;FIELD&gt;&gt; delim="|" ] 
 | search hasSearch= "Yes"
 | rename name as search, usecase as use_case, datasource as providing_technologies, domain as security_domain
-| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
-| sseanalytics   | eval hasSearch=spath(summaries, "hasSearch") | eval includeSSE=spath(summaries, "includeSSE") | eval datasource=spath(summaries, "datasource") | eval displayapp=spath(summaries, "displayapp") | eval app=spath(summaries, "app") | eval journey=spath(summaries, "journey") | eval category=spath(summaries, "category") | eval domain=spath(summaries, "domain") | eval name=spath(summaries, "name") | eval icon=spath(summaries, "icon") | eval description=spath(summaries, "description") | eval dashboard=spath(summaries, "dashboard") | eval mitre=spath(summaries, "mitre") | eval killchain=spath(summaries, "killchain") | eval alertvolume=spath(summaries, "alertvolume") | eval highlight=spath(summaries, "highlight") | eval SPLEase=spath(summaries, "SPLEase")| eval includeSSE=spath(summaries, "includeSSE") | eval bookmark_status=spath(summaries, "bookmark_status")| eval bookmark_user=spath(summaries, "bookmark_user")  | eval usecase=spath(summaries, "usecase") | eval released=spath(summaries, "released") 
+| nomv mitre | nomv killchain | nomv category | nomv providing_technologies | nomv use_case
+| eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ")
+| eval providing_technologies = replace(providing_technologies, ",", " |")
+| eval description = replace(description, ",", "")
+| eval source="Security Essentials"
+| table source, app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| sort search
+| outputlookup dsa_sse_searches.csv
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>UBA</title>
+        <search>
+          <query>| sseanalytics   | eval hasSearch=spath(summaries, "hasSearch") | eval includeSSE=spath(summaries, "includeSSE") | eval datasource=spath(summaries, "datasource") | eval displayapp=spath(summaries, "displayapp") | eval app=spath(summaries, "app") | eval journey=spath(summaries, "journey") | eval category=spath(summaries, "category") | eval domain=spath(summaries, "domain") | eval name=spath(summaries, "name") | eval icon=spath(summaries, "icon") | eval description=spath(summaries, "description") | eval dashboard=spath(summaries, "dashboard") | eval mitre=spath(summaries, "mitre") | eval killchain=spath(summaries, "killchain") | eval alertvolume=spath(summaries, "alertvolume") | eval highlight=spath(summaries, "highlight") | eval SPLEase=spath(summaries, "SPLEase")| eval includeSSE=spath(summaries, "includeSSE") | eval bookmark_status=spath(summaries, "bookmark_status")| eval bookmark_user=spath(summaries, "bookmark_user")  | eval usecase=spath(summaries, "usecase") | eval released=spath(summaries, "released") 
 | eval pipefields = null 
 | foreach category datasourc* killchain mitre usecase 
     [| makemv &lt;&lt;FIELD&gt;&gt; delim="|" ] 
-| search hasSearch= "Yes"
+| search displayapp= "Splunk User Behavior Analytics"
 | rename name as search, usecase as use_case, datasource as providing_technologies, domain as security_domain
-| table app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
+| nomv mitre | nomv killchain | nomv category | nomv providing_technologies | nomv use_case
+| eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ")
+| eval providing_technologies = replace(providing_technologies, ",", " |")
+| eval description = replace(description, ",", "")
+| eval source="Security Essentials"
+| table source, app, search, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain
 | sort search
 | outputlookup dsa_sse_searches.csv
 | stats count</query>
