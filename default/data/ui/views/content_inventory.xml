@@ -9,7 +9,7 @@
           <query>| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | search title!="ESCU - *"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
+| rename eai:acl.app as app, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
 | eval source="ES"
 | sort title
@@ -35,7 +35,7 @@
 | rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | search title="ESCU - *"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
+| rename eai:acl.app as app, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
 | eval description = replace(description, ",", "")
 | eval source="ESCU Searches"
@@ -87,7 +87,7 @@
           <query>| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | search title!="ESCU - *"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
+| rename eai:acl.app as app, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
 | eval source="ES", detection_searches=title
 | table source, app, title, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, qualifiedSearch
@@ -144,7 +144,7 @@
           <query>| rest splunk_server=local count=0 /services/saved/searches 
 | search action.correlationsearch.enabled = "1"
 | search title="ESCU - *"
-| rename eai:acl.app as app, title as bin, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
+| rename eai:acl.app as app, action.correlationsearch.label as title, action.notable.param.security_domain as security_domain 
 | rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
 | eval description = replace(description, ",", "")
 | eval source="ESCU Searches"
