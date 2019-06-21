@@ -2,7 +2,4 @@
   <view name="content_inventory"  default='true'/>
   <view name="data_inventory" />
   <view name="apps_inventory" />
-   <collection label="etc">
-    <view name="johanb" />
-  </collection>
 </nav>
