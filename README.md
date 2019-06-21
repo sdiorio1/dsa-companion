@@ -1,4 +1,4 @@
-# Splunk Data Source Analysis App by Angelo Brancato
+# Splunk Data Source Assessment (DSA) Companion by Angelo Brancato
 
 Content Inventory   --> Inventory of ES, ESCU, SecEssentials and UBA content
 
