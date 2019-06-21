@@ -60,7 +60,7 @@
 | sseanalytics
 | eval source="Security Essentials" 
 | search hasSearch="Yes" app="Splunk_Security_Essentials"
-| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case
+| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case name as title
 | eval description = replace(description, "[&lt;p&gt;,&lt;/p&gt;,&lt;b&gt;,&lt;/b&gt;]","")
 | nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
 | eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ") | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | ")
@@ -71,7 +71,7 @@
 | sseanalytics
 | eval source="UBA" 
 | search app="Splunk_User_Behavior_Analytics"
-| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case
+| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case name as title
 | nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
 | eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ") | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | ")
 | sort title
@@ -182,12 +182,12 @@
           <query>| sseanalytics
 | eval source="Security Essentials" 
 | search hasSearch="Yes" app="Splunk_Security_Essentials"
-| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case
+| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case name as title
 | eval description = replace(description, "[&lt;p&gt;,&lt;/p&gt;,&lt;b&gt;,&lt;/b&gt;]","")
 | nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
 | eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ") | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | ")
-| table source, app, title, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, qualifiedSearch
 | sort title
+| table source, app, title, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, qualifiedSearch
 | outputlookup dsa_sse_searches.csv
 | stats count</query>
           <earliest>-24h@h</earliest>
@@ -204,10 +204,9 @@
           <query>| sseanalytics
 | eval source="UBA" 
 | search app="Splunk_User_Behavior_Analytics"
-| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case
+| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case name as title
 | nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
 | eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ") | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | ")
-| table source, app, title, description, datamodel, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, qualifiedSearch
 | sort title
 | outputlookup dsa_sse_searches.csv
 | stats count</query>
