@@ -9,7 +9,7 @@
 | fields idx, b, st, h, _time, date_wday
 | eval h=if(len(h)=0 OR isnull(h),'(SQUASHED)',h)
 | bin _time span=1d
-| stats sum(b) AS b, dc(h) AS h by st idx date_wday
+| stats sum(b) AS b, dc(h) AS h by st idx _time
 | stats avg(b) as avg_b, avg(h) AS Host_Count_per_Day by idx st
 | eval Avg_MB_per_Day=round(avg_b/1024/1024,2)
 | eval Avg_GB_per_Day=round(avg_b/1024/1024/1024,2)
@@ -22,7 +22,7 @@
 | table Sourcetype, app
 ]
 | table idx, app, Sourcetype, Avg_MB_per_Day, Avg_GB_per_Day, Host_Count_per_Day, Avg_MB_per_Host
-| sort Sourcetype</query>
+| sort -Avg_MB_per_Day</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
