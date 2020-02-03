@@ -1,5 +1,4 @@
 | sseanalytics | rename channel as source, name as title, datasource as providing_technologies
-| table source, title, description, datamodel, providing_technologies, domain, category, usecase, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches
 
 | join type=left title [
 | rest splunk_server=local count=0 /services/saved/searches
@@ -9,7 +8,7 @@
 | rename eai:acl.app as source, action.correlationsearch.label as title, action.notable.param.security_domain as domain, action.escu.analytic_story as analytic_story
 ]
 
-| nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
-| eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ")  | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | "), description = replace(description, "<.+>","")
+| nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv usecase | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
+| eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval usecase = replace(usecase, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ")  | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | "), description = replace(description, "<.+>","")
 
-| table source, title, description, datamodel, inputlookup, providing_technologies, security_domain, category, use_case, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, analytic_story, qualifiedSearch
+| table source, title, description, datamodel, inputlookup, providing_technologies, security_domain, category, usecase, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, analytic_story, qualifiedSearch
