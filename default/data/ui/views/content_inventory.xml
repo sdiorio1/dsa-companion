@@ -177,6 +177,39 @@
     </panel>
     <panel>
       <single>
+        <title>ES Dashboards</title>
+        <search>
+          <query>| rest /servicesNS/-/-/data/ui/views  | where 'eai:appName' LIKE "%ESS%" OR 'eai:appName' LIKE "%EnterpriseSecurity%" | rex field=eai:data "datamodel=(?&lt;dm&gt;\w+)" | where dm!="" | table label, eai:appName, dm | sort label | stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>UBA</title>
+        <search>
+          <query>| sseanalytics
+| eval source="UBA" 
+| search app="Splunk_User_Behavior_Analytics"
+| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case name as title
+| nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
+| eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ") | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | ")
+| sort title
+| outputlookup dsa_sse_searches.csv
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
         <title>Security Essentials</title>
         <search>
           <query>| sseanalytics
@@ -197,25 +230,32 @@
         <option name="refresh.display">progressbar</option>
       </single>
     </panel>
+  </row>
+  <row>
     <panel>
-      <single>
-        <title>UBA</title>
+      <table>
+        <title>new</title>
         <search>
-          <query>| sseanalytics
-| eval source="UBA" 
-| search app="Splunk_User_Behavior_Analytics"
-| rename datasource as providing_technologies domain as security_domain mitre_technique_display as mitre usecase as use_case name as title
-| nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv use_case | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
-| eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval use_case = replace(use_case, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ") | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | ")
-| sort title
-| outputlookup dsa_sse_searches.csv
-| stats count</query>
+          <query>| sseanalytics | rename channel as source, name as title, datasource as providing_technologies
+
+| join type=left title [
+| rest splunk_server=local count=0 /services/saved/searches
+| search action.correlationsearch.enabled = "1"
+| rex field=qualifiedSearch ".*datamodel(=\"|=|:\"|\(\"|\s|:)(?&lt;datamodel&gt;[a-z,A-Z,_]*)"
+| rex field=qualifiedSearch ".*inputlookup(\sappend=[tT]\s|=\"|=|:\"|\(\"|\s|:)(?&lt;inputlookup&gt;[a-z,A-Z,_]*)"
+| rename eai:acl.app as source, action.correlationsearch.label as title, action.notable.param.security_domain as domain, action.escu.analytic_story as analytic_story
+]
+
+| nomv datamodel | nomv providing_technologies | nomv security_domain | nomv category | nomv usecase | nomv mitre | nomv killchain | nomv detection_searches | nomv investigative_searches | nomv contextual_searches | nomv support_searches | nomv qualifiedSearch
+| eval datamodel = replace(datamodel, "\n", " | ") | eval providing_technologies = replace(providing_technologies, "\n", " | ") | eval security_domain = replace(security_domain, "\n", " | ") | eval category = replace(category, "\n", " | ") | eval usecase = replace(usecase, "\n", " | ") | eval mitre = replace(mitre, "\n", " | ") | eval killchain = replace(killchain, "\n", " | ") | eval detection_searches = replace(detection_searches, "\n", " | ") | eval investigative_searches = replace(investigative_searches, "\n", " | ") | eval contextual_searches = replace(contextual_searches, "\n", " | ") | eval support_searches = replace(support_searches, "\n", " | ")  | eval qualifiedSearch = replace(qualifiedSearch, "\n", " | "), description = replace(description, "&lt;.+&gt;","")
+
+| table source, title, description, datamodel, inputlookup, providing_technologies, security_domain, category, usecase, mitre, killchain, detection_searches, investigative_searches, contextual_searches, support_searches, analytic_story, qualifiedSearch</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
         <option name="drilldown">none</option>
         <option name="refresh.display">progressbar</option>
-      </single>
+      </table>
     </panel>
   </row>
 </dashboard>
