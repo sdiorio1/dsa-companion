@@ -1,6 +1,6 @@
 <dashboard theme="dark">
   <label>Content Inventory</label>
-  <description>Please install the Apps: ES, ESCU, Security Essentials</description>
+  <description>Please install these Apps: ES, ESCU, Security Essentials</description>
   <row>
     <panel>
       <single>
